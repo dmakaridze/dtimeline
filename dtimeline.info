@@ -1,0 +1,10 @@
+name = DTimeline
+description = DTimeline
+package = Other
+core = "7.x"
+version = "7.x-1.x-dev"
+project = "dtimeline"
+datestamp = "1427433006"
+stylesheets[all][] = "dtimeline.css"
+scripts[] = "jquery.pep.js"
+scripts[] = "dtimeline.js"
