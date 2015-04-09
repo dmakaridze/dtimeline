@@ -1,3 +1,8 @@
+<?php
+/**
+ *
+ */
+?>
 <div id="dtimeline">
 	<div class="features"></div>
 	<div class="timenav">

@@ -1,4 +1,8 @@
 <?php
+/**
+ *
+ * @return multitype:multitype:string boolean  multitype:string boolean multitype:number
+ */
 function dtimeline_menu() {
   $items = array ();
   // http://e.gov.ge/timeline/ajax/dtimeline/1392163200/5
