@@ -1,89 +1,121 @@
 <?php
 /**
+ * @file
+ * TimelineJS like timeline module for Drupal
  *
- * @return multitype:multitype:string boolean  multitype:string boolean multitype:number
+ * Version: 1.x
+ * Drupal Core: 7.x
+ *
+ */
+/**
+ * Implements hook_help().
+ */
+function dtimeline_help($path, $arg) {
+    switch ($path) {
+        case "admin/help#dtimeline" :
+            return '<p>' . t("Displays timeline") . '</p>';
+            break;
+    }
+}
+
+/**
+ * Implements hook_menu().
  */
 function dtimeline_menu() {
-  $items = array ();
-  // http://e.gov.ge/timeline/ajax/dtimeline/1392163200/5
-  $items ['ajax/dtimeline/%/%'] = array (
-      'title' => '',
-      'page callback' => 'get_timeline',
-      'page arguments' => array (
-          2
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items ['ajax/dtimeline/%'] = array (
-      'title' => '',
-      'page callback' => 'get_timeline',
-      'page arguments' => array (
-          1
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items ['ajax/dtimeline'] = array (
-      'title' => '',
-      'page callback' => 'get_timeline',
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
+    $items = array();
+    // http://e.gov.ge/timeline/ajax/timeline-content/1392163200/5
+    $items['ajax/dtimeline/%/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2, 3), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/dtimeline/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/dtimeline'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/timelinecontent/%/%'] = array('title' => '', 'delivery callback' => 'dtimeline_content_delivery', 'page callback' => 'dtimeline_content_view', 'page arguments' => array(2, 3), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
 
-  return $items;
+    return $items;
 }
-function get_timeline($timestamp = 0, $zoom = 5) {
-  if ($timestamp == 0) {
-    $timestamp = time ();
-  }
-  $delta = 260000 + 6850000 * ($zoom - 1);
-  $dateformat = "Y-m-d H:i:s";
-  $startdate = date ( $dateformat, $timestamp - $delta );
-  $enddate = date ( $dateformat, $timestamp + $delta );
-  $q = db_select ( 'node', 'n' );
-  $q->leftJoin ( 'field_data_field_image', 'i', 'n.nid = i.entity_id' );
-  $q->leftJoin ( 'file_managed', 'f', 'i.field_image_fid = f.fid' );
-  $q->leftJoin ( 'field_data_field_date', 'd', 'n.nid = d.entity_id' );
-  $q->condition ( 'n.type', 'article' );
-  $q->condition ( 'n.status', 0, '>' );
-  $q->condition ( 'd.field_date_value', $startdate, '>' );
-  $q->condition ( 'd.field_date_value', $enddate, '<' );
-  $q->fields ( 'n', array (
-      'nid',
-      'title'
-  ) );
-  $q->fields ( 'f', array (
-      'uri'
-  ) );
-  $q->fields ( 'd', array (
-      'field_date_value'
-  ) );
-  $q->orderBy ( 'field_date_value', 'DESC' );
 
-  $res = $q->execute ();
-  $result = $res->fetchAll ();
-  $page_array = theme ( 'dtimeline_page', array (
-      'events' => $result
-  ) );
-  $dtimeline_settings = array (
-      'timestamp' => $timestamp,
-      'zoom' => $zoom,
-      'delta' => $delta,
-      'id' => 'dtimeline'
-  );
-  drupal_add_js(array('dTimeline' => $dtimeline_settings), 'setting');
-  //drupal_add_js('jQuery(document).ready(function () { redrawTimeline(currentTime, zoomLevel, delta, id); });', 'inline');
-  //drupal_add_js('jQuery(document).ready(function () { alert(settings);', array('type' => 'inline', 'scope' => 'footer', 'weight' => 5));
-  return $page_array;
+/**
+ *
+ */
+function dtimeline_delta($zoom) {
+    return (pow(2, $zoom) * 86400000);
 }
+
+/**
+ *
+ */
+function dtimeline_page_view($timestamp = 0, $zoom = 5) {
+    if (user_access('access content')) {
+        if ($timestamp == 0) {
+            $timestamp = time();
+        }
+        $delta = dtimeline_delta($zoom);
+        //$result = dtimeline_load($timestamp, $zoom, $delta);
+        $content = dtimeline_content_view($timestamp, $zoom, $delta);
+        $page_array = theme('dtimeline_page', array('timeline_content' => $content));
+        $dtimeline_settings = array('timestamp' => $timestamp, 'zoom' => $zoom, 'delta' => $delta, 'id' => 'dtimeline');
+        drupal_add_js(array('dTimeline' => $dtimeline_settings), 'setting');
+        return $page_array;
+    }
+}
+
+/**
+ *
+ */
+function dtimeline_content_delivery($page_callback_result) {
+    print $page_callback_result;
+}
+
+/**
+ *
+ */
+function dtimeline_content_view($timestamp = 0, $zoom = 5) {
+    $delta = dtimeline_delta($zoom);
+    if (user_access('access content')) {
+        $result = dtimeline_load($timestamp, $zoom, $delta);
+        $content = theme('dtimeline_events', array('events' => $result));
+    }
+    return $content;
+}
+
+/**
+ *
+ */
+function dtimeline_load($timestamp, $zoom, $delta) {
+    $dateformat = "Y-m-d H:i:s";
+    $startdate = date($dateformat, $timestamp - $delta);
+    $enddate = date($dateformat, $timestamp + $delta);
+    $q = db_select('node', 'n');
+    $q -> leftJoin('field_data_field_image', 'i', 'n.nid = i.entity_id');
+    $q -> leftJoin('file_managed', 'f', 'i.field_image_fid = f.fid');
+    $q -> leftJoin('field_data_field_date', 'd', 'n.nid = d.entity_id');
+    $q -> condition('n.type', 'article');
+    $q -> condition('n.status', 0, '>');
+    $q -> condition('d.field_date_value', $startdate, '>');
+    $q -> condition('d.field_date_value', $enddate, '<');
+    $q -> fields('n', array('nid', 'title'));
+    $q -> fields('f', array('uri'));
+    $q -> fields('d', array('field_date_value'));
+    $q -> orderBy('field_date_value', 'DESC');
+
+    $res = $q -> execute();
+    $result = $res -> fetchAll();
+    return $result;
+}
+
+/**
+ * Implements hook_theme().
+ */
 function dtimeline_theme() {
-  return array (
-      'dtimeline_page' => array (
-          'variables' => array (
-              'events' => NULL
-          ),
-          'template' => 'dtimeline-data'
-      )
-  );
+    return array('dtimeline_page' => array('variables' => array('events' => NULL), 'template' => 'dtimeline-page'), 'dtimeline_events' => array('variables' => array('events' => NULL), 'template' => 'dtimeline-timeline-content'));
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function dtimeline_block_info() {
+    $blocks['dtimeline'] = array(
+    // The name that will appear in the block list.
+    'info' => t('DTimeline'),
+    // Default setting.
+    'cache' => DRUPAL_CACHE_PER_ROLE, );
+    return $blocks;
 }
