@@ -41,7 +41,8 @@ dTimeline.redraw_timeline = function() {
 	dTimelineElement.style.height = this.windowHeight
 			- document.getElementById('header').clientHeight + "px";
 	this.startTime = this.currentTime - this.delta;
-	this.navBarContentHeight = dTimelineElement.getElementsByClassName('timenav')[0].clientHeight;
+	this.navBarContentHeight = dTimelineElement
+			.getElementsByClassName('timenav')[0].clientHeight;
 	var navBarContent = dTimelineElement.getElementsByClassName('content')[0];
 	navBarContent.style.height = this.navBarContentHeight - 50 + "px";
 	this.rowHeight = (this.navBarContentHeight - 50) / 3;
@@ -61,9 +62,11 @@ dTimeline.redraw_timeline = function() {
 			}
 		}
 	}
-	this.timeWidth = (2 * this.windowWidth - 255) / (this.maxLeft - this.minLeft);
+	this.timeWidth = (2 * this.windowWidth - 255)
+			/ (this.maxLeft - this.minLeft);
 	for (i = 0; i < timeMarkers.length; ++i) {
-		leftPos = (timeMarkers[i].getAttribute('time') - this.minLeft) * this.timeWidth;
+		leftPos = (timeMarkers[i].getAttribute('time') - this.minLeft)
+				* this.timeWidth;
 		timeMarkers[i].style.left = leftPos + 'px';
 		minPoint = 0;
 		for (r = 1; r < 3; ++r) {
@@ -90,11 +93,11 @@ dTimeline.redraw_timeline = function() {
 	this.currentPos = -(this.windowWidth / 2);
 };
 dTimeline.init = function() {
-	this.currentPos = 0;
-	this.mouseOverFlagZ = 0;
-	this.rightPoint = [ 0, 0, 0 ];
-	this.timelineBorders = [ 0, 0, 0, 0 ];
-	this.currentTime = 0;
+	this.currentPos = 0; //timeline left corner position
+	this.mouseOverFlagZ = 0; //mouseover flag z index
+	this.rightPoint = [ 0, 0, 0 ]; //
+	this.timelineBorders = [ 0, 0, 0, 0 ]; //
+	this.currentTime = Drupal.settings.dTimeline.timestamp; //
 	this.currentZoom = 0;
 	this.timeWidth = 0;
 	this.minLeft = 0;
@@ -107,28 +110,30 @@ dTimeline.init = function() {
 (function($) {
 	Drupal.behaviors.pathFieldsetSummaries = {
 		attach : function(context) {
-			dTimeline.init();
-			dTimeline.redraw_timeline();
-			$timenav_wrapper = $('#' + dTimeline.id + ' .timenav-wrapper');
-			$timenav_wrapper
-					.pep(
-							{
-								axis : 'x',
-								constrainTo : dTimeline.timelineBorders,
-								useCSSTranslation : true,
-								startPos : {
-									left : dTimeline.currentPos
-								},
-								drag : function(ev, obj) {
-									dTimeline.currentPos = $timenav_wrapper
-											.position().left;
-									dTimeline.timestamp = (dTimeline.currentPos / dTimeline.timeWidth)
-											+ dTimeline.minLeft;
-									dTimeline.currentTime = (dTimeline.currentPos / dTimeline.timeWidth)
-											+ dTimeline.minLeft;
-									console.log(dTimeline.currentPos);
-								}
-							}).css('top', '0');
+			if (typeof (Drupal.settings.dTimeline) != 'undefined') {
+				dTimeline.init();
+				dTimeline.redraw_timeline();
+				$timenav_wrapper = $('#' + dTimeline.id + ' .timenav-wrapper');
+				$timenav_wrapper
+						.pep(
+								{
+									axis : 'x',
+									constrainTo : dTimeline.timelineBorders,
+									useCSSTranslation : true,
+									startPos : {
+										left : dTimeline.currentPos
+									},
+									drag : function(ev, obj) {
+										dTimeline.currentPos = $timenav_wrapper
+												.position().left;
+										dTimeline.timestamp = (dTimeline.currentPos / dTimeline.timeWidth)
+												+ dTimeline.minLeft;
+										dTimeline.currentTime = (dTimeline.currentPos / dTimeline.timeWidth)
+												+ dTimeline.minLeft;
+										console.log(dTimeline.currentPos);
+									}
+								}).css('top', '0');
+			}
 		}
 	};
 })(jQuery);
