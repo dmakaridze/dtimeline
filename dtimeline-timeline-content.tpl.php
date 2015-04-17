@@ -26,3 +26,8 @@
  </div>
  <?php endforeach;?>
 </div>
+<div class="time">
+  <div class="time-interval-minor"></div>
+  <div class="time-interval-major"></div>
+  <div class="time-interval"></div>
+</div>

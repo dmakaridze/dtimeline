@@ -23,7 +23,7 @@ function dtimeline_help($path, $arg) {
  */
 function dtimeline_menu() {
     $items = array();
-    // http://e.gov.ge/timeline/ajax/timeline-content/1392163200/5
+    // http://e.gov.ge/timeline/ajax/dtimeline/1397627903/10
     $items['ajax/dtimeline/%/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2, 3), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
     $items['ajax/dtimeline/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
     $items['ajax/dtimeline'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
@@ -36,7 +36,7 @@ function dtimeline_menu() {
  *
  */
 function dtimeline_delta($zoom) {
-    return (pow(2, $zoom) * 86400000);
+    return (pow(2, $zoom) * 86400);
 }
 
 /**

@@ -14,11 +14,6 @@
   <div class="timenav-wrapper">
    <div class="timenav-content">
     <?php print $timeline_content;?>
-    <div class="time">
-     <div class="time-interval-minor"></div>
-     <div class="time-interval-major"></div>
-     <div class="time-interval"></div>
-    </div>
    </div>
   </div>
   <div class="timenav-background">
