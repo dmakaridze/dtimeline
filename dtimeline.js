@@ -139,23 +139,7 @@ dTimeline.init = function() {
         dTimeline.init();
         dTimeline.redraw_timeline();
         $timenav_wrapper = $('#' + dTimeline.id + ' .timenav-wrapper');
-        $timenav_wrapper
-            .pep(
-                {
-                  axis : 'x',
-                  constrainTo : dTimeline.timelineBorders,
-                  useCSSTranslation : true,
-                  startPos : {
-                    left : dTimeline.currentPos
-                  },
-                  drag : function(ev, obj) {
-                    dTimeline.currentPos = $timenav_wrapper.position().left;
-                    dTimeline.currentTime = Math.round((dTimeline.windowWidth/2-dTimeline.currentPos-127.5)/dTimeline.timeWidth)+dTimeline.startTime;
-                    if(dTimeline.currentPos<dTimeline.timelineBorders[3]+100){
-                      dTimeline.reload();
-                    };
-                  }
-                }).css('top', '0');
+
       }
     }
   };
