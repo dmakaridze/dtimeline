@@ -25,8 +25,18 @@
             if (!data)
               $this.data('dTimeline', settings);
           }
+          if (action === "select") {
+            var requestURL = 'http://e.gov.ge/timeline/ajax/getnode/'
+              + options.getAttribute('nid');
+            $.ajax(
+                {
+                  url : requestURL
+                }).done(function(c) {
+                $('.features').html(c);
+              });
+          }
           if (action === "send_to_back") {
-            options.style.zIndex = this.mouseOverFlagZ;
+            options.style.zIndex = data.mouseOverFlagZ;
             options.getElementsByClassName('title')[0].style.color = '#999';
             options.getElementsByClassName('line')[0].style.background = '#ccc';
           }
