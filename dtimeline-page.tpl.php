@@ -24,8 +24,8 @@
    </div>
   </div>
   <div class="toolbar-pan">
-   <div class="zoom-in" onClick="dTimeline.zoom_in()"></div>
-   <div class="zoom-out" onClick="dTimeline.zoom_out()"></div>
+   <div class="zoom-in" onClick="timeLine.dTimeline('zoom_in')"></div>
+   <div class="zoom-out" onClick="timeLine.dTimeline('zoom_out')"></div>
   </div>
  </div>
 </div>
