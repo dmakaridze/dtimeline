@@ -9,7 +9,7 @@ if (count ( $node->field_image ) > 0) {
 }
 ?>
 <div class="nav-prev">
-	<img src="prev-btn.png">
+	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/prev-btn.png">
 </div>
 <div class="content">
 	<div class="headline">
@@ -40,5 +40,5 @@ if (count ( $node->field_image ) > 0) {
 	</div>
 </div>
 <div class="nav-next">
-	<img src="next-btn.png">
+	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/next-btn.png">
 </div>

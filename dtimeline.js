@@ -9,13 +9,17 @@ var timeLine;
   Drupal.behaviors.pathFieldsetSummaries = {
     attach : function(context) {
       if (typeof (Drupal.settings.dTimeline) != 'undefined') {
-        timeLine = $('.timenav-wrapper');
-        timeLine.dTimeline('init', {
+        timeLine = $('.timenav-wrapper').dTimeline('init', {
           id : Drupal.settings.dTimeline.id,
+          nid : Drupal.settings.dTimeline.nid,
           currentTime : parseInt(Drupal.settings.dTimeline.timestamp),
-          currentZoom : Drupal.settings.dTimeline.zoom
-        });
-        timeLine.dTimeline('redraw');
+          currentZoom : Drupal.settings.dTimeline.zoom,
+          baseURL: Drupal.settings.dTimeline.baseURL,
+          mPath: Drupal.settings.dTimeline.mPath
+        }).dTimeline('recalc').dTimeline('redraw').dTimeline('slideto');
+        $( window ).resize(function() {
+          $('.timenav-wrapper').dTimeline('redraw');
+        	});
       }
     }
   };

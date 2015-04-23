@@ -11,196 +11,127 @@
  * Implements hook_help().
  */
 function dtimeline_help($path, $arg) {
-  switch ($path) {
-    case "admin/help#dtimeline" :
-      return '<p>' . t( "Displays timeline" ) . '</p>';
-      break;
-  }
+    switch ($path) {
+        case "admin/help#dtimeline" :
+            return '<p>' . t("Displays timeline") . '</p>';
+            break;
+    }
 }
 
 /**
  * Implements hook_menu().
  */
 function dtimeline_menu() {
-  $items = array ();
-  // http://e.gov.ge/timeline/ajax/dtimeline/1397627903/10
-  $items['ajax/dtimeline/%/%'] = array (
-      'title' => '',
-      'page callback' => 'dtimeline_page_view',
-      'page arguments' => array (
-          2,
-          3
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items['ajax/dtimeline/%'] = array (
-      'title' => '',
-      'page callback' => 'dtimeline_page_view',
-      'page arguments' => array (
-          2
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items['ajax/dtimeline'] = array (
-      'title' => '',
-      'page callback' => 'dtimeline_page_view',
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items['ajax/timelinecontent/%/%'] = array (
-      'title' => '',
-      'delivery callback' => 'dtimeline_content_delivery',
-      'page callback' => 'dtimeline_content_view',
-      'page arguments' => array (
-          2,
-          3
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  $items['ajax/getnode/%'] = array (
-      'title' => '',
-      'delivery callback' => 'dtimeline_content_delivery',
-      'page callback' => 'dtimeline_get_node',
-      'page arguments' => array (
-          2
-      ),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => TRUE
-  );
-  return $items;
+    $items = array();
+    // http://e.gov.ge/timeline/ajax/dtimeline/1397627903/10
+    $items['ajax/dtimeline/%/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2, 3), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/dtimeline/%'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'page arguments' => array(2), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/dtimeline'] = array('title' => '', 'page callback' => 'dtimeline_page_view', 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/timelinecontent/%/%'] = array('title' => '', 'delivery callback' => 'dtimeline_content_delivery', 'page callback' => 'dtimeline_content_view', 'page arguments' => array(2, 3), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    $items['ajax/getnode/%'] = array('title' => '', 'delivery callback' => 'dtimeline_content_delivery', 'page callback' => 'dtimeline_get_node', 'page arguments' => array(2), 'type' => MENU_NORMAL_ITEM, 'access callback' => TRUE);
+    return $items;
 }
 
 /**
  */
 function dtimeline_delta($zoom) {
-  return (pow( 2, $zoom ) * 86400);
+    return (pow(2, $zoom) * 86400);
 }
+
 /**
  */
 function dtimeline_get_node($nid) {
-  if (user_access( 'access content' )) {
-    $node = node_load($nid);
-    $nodeview = node_view($node);
-    $node_array = theme( 'dtimeline_node', array (
-        'node' => $node
-    ) );
-    return ($node_array);
-  }
+    if (user_access('access content')) {
+        $node = node_load($nid);
+        $nodeview = node_view($node);
+        $node_array = theme('dtimeline_node', array('node' => $node));
+        return ($node_array);
+    }
 }
+
 /**
  */
-function dtimeline_page_view($timestamp = 0, $zoom = 5) {
-  if (user_access( 'access content' )) {
-    if ($timestamp == 0) {
-      $timestamp = time();
+function dtimeline_page_view($nid = 0, $zoom = 5) {
+    global $language;
+    if (user_access('access content')) {
+        if ($nid == 0) {
+            $timestamp = time();
+        } else {
+            $node = node_load($nid);
+            if ($node) {
+                $lang = $language -> language;
+                $date = reset($node -> field_date);
+                $timestamp = strtotime($date[0]['value']);
+            } else {
+                $timestamp = time();
+            }
+        }
+        $delta = dtimeline_delta($zoom);
+        // $result = dtimeline_load($timestamp, $zoom, $delta);
+        $content = dtimeline_content_view($timestamp, $zoom, $delta);
+        $page_array = theme('dtimeline_page', array('timeline_content' => $content));
+        $dtimeline_settings = array('nid'=>$nid, 'timestamp' => $timestamp, 'zoom' => $zoom, 'delta' => $delta, 'id' => 'dtimeline', 'mPath' => $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline'), 'baseURL'=>$GLOBALS['base_url'].'/ajax');
+        drupal_add_js(array('dTimeline' => $dtimeline_settings), 'setting');
+        return $page_array;
     }
-    $delta = dtimeline_delta( $zoom );
-    // $result = dtimeline_load($timestamp, $zoom, $delta);
-    $content = dtimeline_content_view( $timestamp, $zoom, $delta );
-    $page_array = theme( 'dtimeline_page', array (
-        'timeline_content' => $content
-    ) );
-    $dtimeline_settings = array (
-        'timestamp' => $timestamp,
-        'zoom' => $zoom,
-        'delta' => $delta,
-        'id' => 'dtimeline'
-    );
-    drupal_add_js( array (
-        'dTimeline' => $dtimeline_settings
-    ), 'setting' );
-    return $page_array;
-  }
 }
 
 /**
  */
 function dtimeline_content_delivery($page_callback_result) {
-  print $page_callback_result;
+    print $page_callback_result;
 }
 
 /**
  */
 function dtimeline_content_view($timestamp = 0, $zoom = 5) {
-  $delta = dtimeline_delta( $zoom );
-  if (user_access( 'access content' )) {
-    $result = dtimeline_load( $timestamp, $zoom, $delta );
-    $content = theme( 'dtimeline_events', array (
-        'events' => $result
-    ) );
-  }
-  return $content;
+    $delta = dtimeline_delta($zoom);
+    if (user_access('access content')) {
+        $result = dtimeline_load($timestamp, $zoom, $delta);
+        $content = theme('dtimeline_events', array('events' => $result));
+    }
+    return $content;
 }
 
 /**
  */
 function dtimeline_load($timestamp, $zoom, $delta) {
-  $dateformat = "Y-m-d H:i:s";
-  $startdate = date( $dateformat, $timestamp - $delta );
-  $enddate = date( $dateformat, $timestamp + $delta );
-  $q = db_select( 'node', 'n' );
-  $q->leftJoin( 'field_data_field_image', 'i', 'n.nid = i.entity_id' );
-  $q->leftJoin( 'file_managed', 'f', 'i.field_image_fid = f.fid' );
-  $q->leftJoin( 'field_data_field_date', 'd', 'n.nid = d.entity_id' );
-  $q->condition( 'n.type', 'article' );
-  $q->condition( 'n.status', 0, '>' );
-  $q->condition( 'd.field_date_value', $startdate, '>' );
-  $q->condition( 'd.field_date_value', $enddate, '<' );
-  $q->fields( 'n', array (
-      'nid',
-      'title'
-  ) );
-  $q->fields( 'f', array (
-      'uri'
-  ) );
-  $q->fields( 'd', array (
-      'field_date_value'
-  ) );
-  $q->orderBy( 'field_date_value', 'DESC' );
+    $dateformat = "Y-m-d H:i:s";
+    $startdate = date($dateformat, $timestamp - $delta);
+    $enddate = date($dateformat, $timestamp + $delta);
+    $q = db_select('node', 'n');
+    $q -> leftJoin('field_data_field_image', 'i', 'n.nid = i.entity_id');
+    $q -> leftJoin('file_managed', 'f', 'i.field_image_fid = f.fid');
+    $q -> leftJoin('field_data_field_date', 'd', 'n.nid = d.entity_id');
+    $q -> condition('n.type', 'article');
+    $q -> condition('n.status', 0, '>');
+    $q -> condition('d.field_date_value', $startdate, '>');
+    $q -> condition('d.field_date_value', $enddate, '<');
+    $q -> fields('n', array('nid', 'title'));
+    $q -> fields('f', array('uri'));
+    $q -> fields('d', array('field_date_value'));
+    $q -> orderBy('field_date_value', 'ASC');
 
-  $res = $q->execute();
-  $result = $res->fetchAll();
-  return $result;
+    $res = $q -> execute();
+    $result = $res -> fetchAll();
+    return $result;
 }
 
 /**
  * Implements hook_theme().
  */
 function dtimeline_theme() {
-  return array (
-      'dtimeline_page' => array (
-          'variables' => array (
-              'events' => NULL
-          ),
-          'template' => 'dtimeline-page'
-      ),
-      'dtimeline_events' => array (
-          'variables' => array (
-              'events' => NULL
-          ),
-          'template' => 'dtimeline-timeline-content'
-      ),
-      'dtimeline_node' => array (
-          'variables' => array (
-              'node' => NULL
-          ),
-          'template' => 'dtimeline-node'
-      )
-  );
+    return array('dtimeline_page' => array('variables' => array('events' => NULL), 'template' => 'dtimeline-page'), 'dtimeline_events' => array('variables' => array('events' => NULL), 'template' => 'dtimeline-timeline-content'), 'dtimeline_node' => array('variables' => array('node' => NULL), 'template' => 'dtimeline-node'));
 }
 
 /**
  * Implements hook_block_info().
  */
 function dtimeline_block_info() {
-  $blocks['dtimeline'] = array (
-      // The name that will appear in the block list.
-      'info' => t( 'DTimeline' ),
-      // Default setting.
-      'cache' => DRUPAL_CACHE_PER_ROLE
-  );
-  return $blocks;
+    $blocks['dtimeline'] = array(
+    // The name that will appear in the block list.
+    'info' => t('DTimeline'),
+    // Default setting.
+    'cache' => DRUPAL_CACHE_PER_ROLE);
+    return $blocks;
 }
