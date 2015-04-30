@@ -37,7 +37,11 @@ function dtimeline_menu() {
 function dtimeline_delta($zoom) {
     return (pow(2, $zoom) * 86400);
 }
-
+/**
+ */
+function dtimeline_zoom($delta) {
+    return log($delta / 86400, 2);
+}
 /**
  */
 function dtimeline_get_node($nid) {
@@ -68,7 +72,7 @@ function dtimeline_page_view($nid = 0, $zoom = 5) {
         }
         $delta = dtimeline_delta($zoom);
         // $result = dtimeline_load($timestamp, $zoom, $delta);
-        $content = dtimeline_content_view($timestamp, $zoom, $delta);
+        $content = dtimeline_content_view($timestamp-$delta, $timestamp+$delta);
         $page_array = theme('dtimeline_page', array('timeline_content' => $content));
         $dtimeline_settings = array('nid'=>$nid, 'timestamp' => $timestamp, 'zoom' => $zoom, 'delta' => $delta, 'id' => 'dtimeline', 'mPath' => $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline'), 'baseURL'=>$GLOBALS['base_url'].'/ajax');
         drupal_add_js(array('dTimeline' => $dtimeline_settings), 'setting');
@@ -84,11 +88,23 @@ function dtimeline_content_delivery($page_callback_result) {
 
 /**
  */
-function dtimeline_content_view($timestamp = 0, $zoom = 5) {
-    $delta = dtimeline_delta($zoom);
+function dtimeline_content_view($starttime = 0, $endtime = 0) {
+    $delta = round(($endtime - $starttime) / 2) ;
+    $zoom = dtimeline_zoom($delta);
+    $timestamp = $endtime - $delta;
     if (user_access('access content')) {
         $result = dtimeline_load($timestamp, $zoom, $delta);
-        $content = theme('dtimeline_events', array('events' => $result));
+        $min_time = $result [0] ->field_date_value;
+        $max_time = $min_time;
+        foreach ($result as $key => $event) {
+            if ($min_time > $event->field_date_value) {
+                $min_time = $event->field_date_value;
+            }
+            if ($max_time < $event->field_date_value) {
+                $max_time = $event->field_date_value;
+            }
+        }
+        $content = theme('dtimeline_events', array('events' => $result, 'min_time' => $min_time, 'max_time'=>$max_time));
     }
     return $content;
 }
@@ -105,8 +121,8 @@ function dtimeline_load($timestamp, $zoom, $delta) {
     $q -> leftJoin('field_data_field_date', 'd', 'n.nid = d.entity_id');
     $q -> condition('n.type', 'article');
     $q -> condition('n.status', 0, '>');
-    $q -> condition('d.field_date_value', $startdate, '>');
-    $q -> condition('d.field_date_value', $enddate, '<');
+    //$q -> condition('d.field_date_value', $startdate, '>');
+    //$q -> condition('d.field_date_value', $enddate, '<');
     $q -> fields('n', array('nid', 'title'));
     $q -> fields('f', array('uri'));
     $q -> fields('d', array('field_date_value'));

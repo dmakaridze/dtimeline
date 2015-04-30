@@ -1,5 +1,6 @@
 (function($) {
   var defaults = {
+    selector: ".timenav-wrapper",
     id: "dtimeline",
     mPath: "", // Module path in Drupal directory
     baseURL: "", // Base url for dTimeline jQuery module
@@ -11,8 +12,8 @@
     delta: 0, //
     startTime: 0, // Timeline start timestamp
     endTime: 0, // Timeline end timestamp
-    maxTime: 0,
     minTime: 0,
+    maxTime:0,
     nid: 0, // Current marker nid
     currentPos: 0, // Timeline current position
     currentMarkerId: "",
@@ -23,7 +24,29 @@
     featuresContentHeight: 0,
     dragged: false,
     timeline: {}, // Timeline DOM object
-    markerW: 220
+    markerW: 220,
+    setPos: function(position) {
+      if (position != this.currentPos) {
+        this.currentPos = position;
+        /*if (this.currentPos > 0) {
+          this.currentTime = (this.winW / 2 - this.currentPos) / this.timeW + this.startTime;
+          $(this.selector).dTimeline('recalc');
+          var requestURL = this.baseURL + '/timelinecontent/' + (this.startTime - this.delta / 2) + '/' + (this.endTime - this.delta / 2);
+          $.ajax({
+            url: requestURL
+          }).done(
+            function(c) {
+              $(this.selector + '.timenav-content').empty().html(c);
+              this.currentPos = -(window.innerWidth / 2);
+              $(this.selector).dTimeline('recalc').dTimeline('redraw').dTimeline('slideto');
+              window.history.pushState({}, "",
+                this.baseURL + '/dtimeline/' + this.nid + '/' + this.currentZoom);
+            });
+        } else if (this.currentPos < -10000) {
+
+        }*/
+      }
+    }
   };
   jQuery.fn.dTimeline = function(action, options) {
     return this
@@ -38,6 +61,7 @@
           }
           data.timeline = document.getElementById(data.id);
           data.timeH = $(data.timeline).find('.timenav .time').height();
+          data.setPos(- window.innerWidth / 2);
         }
         if (action === 'recalc') {
           data.delta = Math.pow(2, data.currentZoom) * 86400;
@@ -45,24 +69,8 @@
           data.winH = window.innerHeight;
           data.startTime = data.currentTime - data.delta;
           data.endTime = data.currentTime + data.delta;
-          data.currentPos = -(data.winW / 2);
-        }
-        if (action === "slideto") {
-          $('#' + data.currentMarkerId).removeClass('active');
-          data.currentMarkerId = "marker" + data.nid;
-          $currentMarker = $("#" + data.currentMarkerId);
-          $currentMarker.addClass('active');
-          $('.timenav-content').animate({
-            "left": data.winW / 2 - $currentMarker.position().left
-          }, "slow");
-          data.currentTime = parseInt($currentMarker.attr('time'));
-          $.ajax({
-            url: data.baseURL + '/getnode/' + data.nid
-          }).done(
-            function(c) {
-              $('.features').html(c);
-              $('.features .content').width(data.winW - 230).height(data.featuresContentHeight);
-            });
+          data.minTime = minTime;
+          data.maxTime = maxTime;
         }
         if (action === "select") {
           if (!data.dragged) {
@@ -70,10 +78,13 @@
             data.currentMarkerId = options.id;
             $currentMarker = $("#" + data.currentMarkerId);
             $currentMarker.addClass('active');
+            data.setPos(data.winW / 2 - $currentMarker.position().left);
             $('.timenav-content').animate({
-              "left": data.winW / 2 - $currentMarker.position().left
+              "left": data.currentPos
             }, "slow");
+
             data.currentTime = parseInt($currentMarker.attr('time'));
+
             data.nid = parseInt($currentMarker.attr('nid'));
             var requestURL = data.baseURL + '/getnode/' + data.nid;
             $.ajax({
@@ -101,13 +112,14 @@
         if (action === "zoom_out") {
           if (data.currentZoom < 12) {
             data.currentZoom++;
-            var requestURL = data.baseURL + '/timelinecontent/' + data.currentTime + '/' + data.currentZoom;
+            $this.dTimeline('recalc');
+            var requestURL = data.baseURL + '/timelinecontent/' + data.startTime + '/' + data.endTime;
             $.ajax({
               url: requestURL
             }).done(
               function(c) {
                 $('.timenav-wrapper .timenav-content').empty().html(c);
-                $this.dTimeline('recalc');
+                data.setPos(-(window.innerWidth / 2));
                 $this.dTimeline('redraw');
                 window.history.pushState({}, "",
                   data.baseURL + '/dtimeline/' + data.nid + '/' + data.currentZoom);
@@ -117,13 +129,14 @@
         if (action === "zoom_in") {
           if (data.currentZoom > 1) {
             data.currentZoom--;
-            var requestURL = data.baseURL + '/timelinecontent/' + data.currentTime + '/' + data.currentZoom;
+            $this.dTimeline('recalc');
+            var requestURL = data.baseURL + '/timelinecontent/' + data.startTime + '/' + data.endTime;
             $.ajax({
               url: requestURL
             }).done(
               function(c) {
                 $('.timenav-wrapper .timenav-content').empty().html(c);
-                $this.dTimeline('recalc');
+                data.setPos(-(window.innerWidth / 2));
                 $this.dTimeline('redraw');
                 window.history.pushState({}, "",
                   data.baseURL + '/dtimeline/' + data.nid + '/' + data.currentZoom);
@@ -151,10 +164,12 @@
           data.featuresContentHeight = data.winH - $('#page header').height() - 43 - data.navBarContentHeight;
           $(data.timeline).find('.content').height(data.navBarContentHeight - data.timeH);
           data.rowHeight = (data.navBarContentHeight - data.timeH) / 3;
-          var timeMarkers = $(data.timeline).find('.marker');
-          data.timeW = (2 * data.winW - 255) / (data.endTime - data.startTime);
+          //data.timeW = (2 * data.winW /*- 255*/ ) / (data.endTime - data.startTime);
+          data.timeW = 32/(Math.pow(2,data.currentZoom)*86400);
+          var timelineWidth = 0;
           $(data.timeline).find('.marker').each(function(i) {
-            var markerPos = ($(this).attr('time') - data.startTime) * data.timeW;
+            //var markerPos = ($(this).attr('time') - data.startTime) * data.timeW;
+            var markerPos = ($(this).attr('time') - data.minTime) * data.timeW;
             $(this).css('left', markerPos);
             var minPoint = 0;
             for (r = 1; r < 3; ++r) {
@@ -165,24 +180,56 @@
             data.rightPoint[i % 3] = markerPos + 255;
             $(this).find('.flag').css('top', data.rowHeight * (minPoint) + 1)
               .height(data.rowHeight - 3);
-          })
-
+            if (markerPos > timelineWidth) {
+              timelineWidth = markerPos;
+            }
+          });
+          var prevLabRightPoint = -50;
+          $(data.timeline).find('.time-interval div').each(function(i) {
+            var labelPos = ($(this).attr('time') - data.minTime) * data.timeW;
+            $(this).css('left', labelPos);
+            if (labelPos < prevLabRightPoint + 50) {
+              $(this).hide();
+            } else {
+              $(this).show();
+              prevLabRightPoint = labelPos + $(this).width();
+            }          
+          });
+          var firstLabel = true;
+          $(data.timeline).find('.time-interval-major div').each(function(i) {
+            var labelPos = ($(this).attr('time') - data.minTime) * data.timeW;
+            if (firstLabel) {
+              labelPos = 0;
+              firstLabel = false;
+            }
+            $(this).css('left', labelPos);
+          });
+          timelineWidth += 255;
           timenavContent = $(data.timeline).find('.timenav-content');
-          timenavContent.height(data.navBarContentHeight - data.timeH).width(2 * data.winW);
+          //timenavContent.height(data.navBarContentHeight - data.timeH).width(2 * data.winW);
+          timenavContent.height(data.navBarContentHeight - data.timeH).width(timelineWidth);
           timeBar = timenavContent.find('.time');
-          timeBar.width(2 * data.winW);
+          //timeBar.width(2 * data.winW);
+          timeBar.width(timelineWidth);
+          
+          //for (t=data.minTime; t<data.maxTime; t+=(86400)){
+        	//  var d = new Date(t*1000);
+        	//  $('.time-interval').append('<div>'+d.getMonth()+' '+d.getDate()+'</div>')
+          //}
+          $(".time-interval div").each(function (){});
           data.dragged = false;
           $('.timenav-content')
             .draggable()
             .draggable({
               start: function(event, ui) {
                 data.dragged = true;
-                if (typeof(data.currentMarkerId) != "undefined" && data.currentMarkerId !== null) {
-                  $(
-                      '#' + data.currentMarkerId)
-                    .removeClass(
-                      'active');
-                };
+                $('#' + data.currentMarkerId).removeClass('active');
+              },
+              stop: function(event, ui) {
+                  data.dragged = false;
+              },
+              drag: function(event, ui) {
+                data.setPos(ui.position.left);
               },
               axis: "x"
             });

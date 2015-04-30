@@ -11,16 +11,16 @@
 <div id="dtimeline">
  <div class="features"></div>
  <div class="timenav">
-  <div class="timenav-wrapper">
-   <div class="timenav-content">
-    <?php print $timeline_content;?>
-   </div>
-  </div>
-  <div class="timenav-background">
+   <div class="timenav-background">
    <div class="timenav-line"></div>
    <div class="timenav-indicator"></div>
    <div class="timenav-interval-background">
     <div class="top-highlight"></div>
+   </div>
+  </div>
+  <div class="timenav-wrapper">
+   <div class="timenav-content">
+    <?php print $timeline_content;?>
    </div>
   </div>
   <div class="toolbar-pan">

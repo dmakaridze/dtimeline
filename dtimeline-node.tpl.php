@@ -8,7 +8,7 @@ if (count ( $node->field_image ) > 0) {
  $image = image_style_url ( 'medium', $image [0] ['uri'] );
 }
 ?>
-<div class="nav-prev">
+<div class="nav-prev" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).prev().get()[0]);">
 	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/prev-btn.png">
 </div>
 <div class="content">
@@ -39,6 +39,6 @@ if (count ( $node->field_image ) > 0) {
     </div>
 	</div>
 </div>
-<div class="nav-next">
+<div class="nav-next" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).next().get()[0]);">
 	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/next-btn.png">
 </div>

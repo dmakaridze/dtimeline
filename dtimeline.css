@@ -20,6 +20,7 @@
     top: 0;
     left: 0;
     z-index: 1;
+    width:inherit;
 }
 
 #dtimeline .timenav .timenav-content .content .marker {
@@ -274,7 +275,19 @@
 .features .nav-next {
     text-align: right;
 }
-
+.time-interval div {
+position: absolute;
+    color:#555;
+      top: 20px;
+  font-size: 12px;
+}
+.time-interval-major div {
+  position: absolute;
+  color: #555;
+  top: 36px;
+  font-size: 14px;
+  font-weight: 700;
+}
 ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
   -webkit-border-radius: 10px;
