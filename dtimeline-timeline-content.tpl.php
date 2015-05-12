@@ -17,10 +17,7 @@ var maxTime = <?php print strtotime ($max_time);?>;
  <div class="marker" id="marker<?php print $event->nid;?>"
 		nid="<?php print $event->nid;?>" url=""
 		time="<?php print strtotime($event->field_date_value);?>">
-		<div class="flag"
-			onclick="timeLine.dTimeline('select',this.parentNode)"
-			onmouseover="timeLine.dTimeline('bring_to_front',this.parentNode)"
-			onmouseout="timeLine.dTimeline('send_to_back',this.parentNode)">
+		<div class="flag">
 			<div class="flag-content">
 				<div class="thumbnail" id="thumb<?php print $event->nid;?>">
      <?php if ($event->uri != ""):?>

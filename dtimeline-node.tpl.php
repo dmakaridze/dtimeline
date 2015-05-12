@@ -8,15 +8,7 @@ if (count ( $node->field_image ) > 0) {
  $image = image_style_url ( 'medium', $image [0] ['uri'] );
 }
 ?>
-<<<<<<< HEAD
-<<<<<<< HEAD
 <div class="nav-prev" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).prev().get()[0]);">
-=======
-<div class="nav-prev">
->>>>>>> 73c76901012f2b7b888bff8b449c6d3dd5838066
-=======
-<div class="nav-prev" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).prev().get()[0]);">
->>>>>>> 3622f4d5f04b3abe1b6b1590ac19d03efb915ad9
 	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/prev-btn.png">
 </div>
 <div class="content">
@@ -47,14 +39,6 @@ if (count ( $node->field_image ) > 0) {
     </div>
 	</div>
 </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
 <div class="nav-next" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).next().get()[0]);">
-=======
-<div class="nav-next">
->>>>>>> 73c76901012f2b7b888bff8b449c6d3dd5838066
-=======
-<div class="nav-next" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).next().get()[0]);">
->>>>>>> 3622f4d5f04b3abe1b6b1590ac19d03efb915ad9
 	<img src="<?php print $GLOBALS['base_url'].'/'.drupal_get_path('module', 'dtimeline');?>/next-btn.png">
 </div>

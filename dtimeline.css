@@ -20,14 +20,7 @@
     top: 0;
     left: 0;
     z-index: 1;
-<<<<<<< HEAD
-<<<<<<< HEAD
     width:inherit;
-=======
->>>>>>> 73c76901012f2b7b888bff8b449c6d3dd5838066
-=======
-    width:inherit;
->>>>>>> 3622f4d5f04b3abe1b6b1590ac19d03efb915ad9
 }
 
 #dtimeline .timenav .timenav-content .content .marker {
@@ -282,10 +275,6 @@
 .features .nav-next {
     text-align: right;
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 3622f4d5f04b3abe1b6b1590ac19d03efb915ad9
 .time-interval div {
 position: absolute;
     color:#555;
@@ -299,12 +288,6 @@ position: absolute;
   font-size: 14px;
   font-weight: 700;
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 73c76901012f2b7b888bff8b449c6d3dd5838066
-=======
->>>>>>> 3622f4d5f04b3abe1b6b1590ac19d03efb915ad9
 ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
   -webkit-border-radius: 10px;
