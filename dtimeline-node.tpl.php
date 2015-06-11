@@ -5,7 +5,9 @@ $date = reset ( $node->field_date );
 $date = format_date ( strtotime ( $date [0] ['value'] ), 'custom', 'F j, Y', $date [0] ['timezone'], $lang );
 if (count ( $node->field_image ) > 0) {
  $image = reset ( $node->field_image );
- $image = image_style_url ( 'medium', $image [0] ['uri'] );
+ $bigimage = image_style_url ( 'source',  $image [0] ['uri']);
+ $image = image_style_url ( 'medium',  $image [0] ['uri']);
+
 }
 ?>
 <div class="nav-prev" onclick = "timeLine.dTimeline('select',jQuery('#marker'+timeLine.data('dTimeline').nid).prev().get()[0]);">
@@ -21,7 +23,7 @@ if (count ( $node->field_image ) > 0) {
       <?php if (isset($image)):?>
       <div class="media" style="float: left;">
 
-				<a href="" data-lightbox="FSdUXH" data-title=""> <img
+				<a class="fancybox" rel="group" href="<?php print $bigimage;?>"> <img
 					src="<?php print $image;?>" class="media-image">
 				</a>
 			</div>

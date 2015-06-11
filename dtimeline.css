@@ -38,6 +38,7 @@
     background: #fff;
     box-shadow: 1px 1px 5px #999;
     pointer-events: initial;
+    overflow:hidden;
 }
 
 #dtimeline .time .time-interval-minor {

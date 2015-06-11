@@ -9,9 +9,6 @@
     timeW: 0, // 
     currentTime: 0,
     currentZoom: 0,
-    delta: 0, //
-    startTime: 0, // Timeline start timestamp
-    endTime: 0, // Timeline end timestamp
     minTime: 0,
     maxTime:0,
     nid: 0, // Current marker nid
@@ -28,9 +25,25 @@
     setPos: function(position) {
       if (position != this.currentPos) {
         this.currentPos = position;
+        this.currentTime = Math.round(this.minTime - (this.currentPos - this.winW / 2)/this.timeW);
       }
     }
   };
+  var dragMomentum = new function () {    
+    var howMuch = 300;
+    var easeType = 'easeOutQuad';
+    var dXa =[0];
+    var dTa =[0];
+    this.start = function (elemId, Xa, Ta)  {
+        dXa[elemId] = Xa;
+        dTa[elemId] = Ta;
+      };
+    this.end = function (elemId, Xb, Tb)  {        
+        var newLocX = $('#'+elemId).position().left - Math.round(((dXa[elemId]-Xb) / (Tb - dTa[elemId]))*howMuch) ;
+        $('#'+elemId).animate({ left:newLocX }, 700, easeType );
+    };
+
+};
   jQuery.fn.dTimeline = function(action, options) {
     return this
       .each(function() {
@@ -47,13 +60,10 @@
           data.setPos(- window.innerWidth / 2);
         }
         if (action === 'recalc') {
-          data.delta = Math.pow(2, data.currentZoom) * 86400;
           data.winW = window.innerWidth;
           data.winH = window.innerHeight;
-          data.startTime = data.currentTime - data.delta;
-          data.endTime = data.currentTime + data.delta;
-          data.minTime = minTime;
-          data.maxTime = maxTime;
+          data.timeW = 256/(Math.pow(2,data.currentZoom/4)*86400);
+          data.currentPos = (data.minTime - data.currentTime)*data.timeW+ data.winW /2;
         }
         if (action === "select") {
           if (!data.dragged) {
@@ -64,10 +74,7 @@
             data.setPos(data.winW / 2 - $currentMarker.position().left);
             $('.timenav-content').animate({
               "left": data.currentPos
-            }, "slow");
-
-            data.currentTime = parseInt($currentMarker.attr('time'));
-
+            }, 800);
             data.nid = parseInt($currentMarker.attr('nid'));
             var requestURL = data.baseURL + '/getnode/' + data.nid;
             $.ajax({
@@ -97,6 +104,7 @@
             data.currentZoom++;
             $this.dTimeline('recalc');
             $this.dTimeline('redraw');
+            $('.timenav-content').hide().css("left", data.currentPos).show();
             window.history.pushState({}, "",
               data.baseURL + '/dtimeline/' + data.nid + '/' + data.currentZoom);
           }
@@ -106,17 +114,17 @@
             data.currentZoom--;
             $this.dTimeline('recalc');
             $this.dTimeline('redraw');
+            $('.timenav-content').hide().css("left", data.currentPos).show();
             window.history.pushState({}, "",
                 data.baseURL + '/dtimeline/' + data.nid + '/' + data.currentZoom);
           }
         }
         if (action === "reload") {
-
         }
         if (action === "setContent") {
-
         }
         if (action === "redraw") {
+          $('.timenav-content').hide();
           var timeNavLine = $('#dtimeline .timenav-background .timenav-line');
           timeNavLine.offset({
             left: (data.winW - timeNavLine.width()) / 2
@@ -131,7 +139,6 @@
           data.featuresContentHeight = data.winH - $('#page header').height() - 43 - data.navBarContentHeight;
           $(data.timeline).find('.content').height(data.navBarContentHeight - data.timeH);
           data.rowHeight = (data.navBarContentHeight - data.timeH) / 3;
-          data.timeW = 256/(Math.pow(2,data.currentZoom)*86400);
           var timelineWidth = 0;
           $(data.timeline).find('.marker').each(function(i) {
             var markerPos = ($(this).attr('time') - data.minTime) * data.timeW;
@@ -176,27 +183,30 @@
           timeBar.width(timelineWidth);
           $(".time-interval div").each(function (){});
           data.dragged = false;
+
           $('.timenav-content')
             .draggable()
             .draggable({
               start: function(event, ui) {
                 data.dragged = true;
                 $('#' + data.currentMarkerId).removeClass('active');
+                dragMomentum.start(this.id, event.clientX, event.timeStamp);
               },
               stop: function(event, ui) {
-                  //data.dragged = false;
+                dragMomentum.end(this.id, event.clientX, event.timeStamp);
               },
               drag: function(event, ui) {
                 data.setPos(ui.position.left);
+                var dddate = new Date(data.currentTime * 1000);
               },
               containment: [data.winW/2-$('.timenav-content').width(),0,data.winW/2,data.winH],
               axis: "x"
             });
-          console.log(data.winW/2);
-          //$('.timenav-content').mouseup(function(mouseEvent){data.dragged = false;});
+
           $(".flag").click(function(mouseEvent){timeLine.dTimeline('select',this.parentNode);});
           $(".flag").mouseover(function(mouseEvent){timeLine.dTimeline('bring_to_front',this.parentNode);});
           $(".flag").mouseout(function(mouseEvent){timeLine.dTimeline('send_to_back',this.parentNode);});
+          $('.timenav-content').show();
         }
       });
   };

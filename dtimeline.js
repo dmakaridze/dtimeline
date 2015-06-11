@@ -9,18 +9,22 @@ var timeLine;
   Drupal.behaviors.pathFieldsetSummaries = {
     attach : function(context) {
       if (typeof (Drupal.settings.dTimeline) != 'undefined') {
-          //$( window ).resize(function() {
-          //  $('.timenav-wrapper').dTimeline('redraw');
-          //	});
+        $( window ).resize(function() {
+         $('.timenav-wrapper').dTimeline('redraw');
+        });
+        $('.timenav-content').hide();
         timeLine = $('.timenav-wrapper').dTimeline('init', {
           id : Drupal.settings.dTimeline.id,
           nid : Drupal.settings.dTimeline.nid,
           currentTime : parseInt(Drupal.settings.dTimeline.timestamp),
           currentZoom : Drupal.settings.dTimeline.zoom,
           baseURL: Drupal.settings.dTimeline.baseURL,
-          mPath: Drupal.settings.dTimeline.mPath
+          mPath: Drupal.settings.dTimeline.mPath,
+          minTime: minTime,
+          maxTime: maxTime
         }).dTimeline('recalc').dTimeline('redraw');
         timeLine.dTimeline('select', $('#marker'+Drupal.settings.dTimeline.nid)[0]);
+        $(".fancybox").fancybox();
       }
     }
   };

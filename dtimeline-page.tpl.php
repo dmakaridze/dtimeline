@@ -20,7 +20,7 @@
    </div>
   </div>
   <div class="timenav-wrapper">
-   <div class="timenav-content">
+   <div class="timenav-content" id="timenav-content">
     <?php print $timeline_content;?>
    </div>
   </div>
